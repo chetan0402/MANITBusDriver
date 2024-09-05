@@ -86,7 +86,19 @@ class TrackActivity : AppCompatActivity() {
         }
 
         stopButton.setOnClickListener {
-            stopService(Intent(this,LocationService::class.java))
+            runOnUiThread {
+                MaterialAlertDialogBuilder(this).run {
+                    setTitle("Confirm")
+                    setMessage("End duty?")
+                    setNegativeButton("No") { _ ,_ -> }
+                    setPositiveButton("Yes") { _ , _ ->
+                        stopService(Intent(this@TrackActivity,LocationService::class.java))
+                        finish()
+                    }
+                    setCancelable(false)
+                    show()
+                }
+            }
         }
     }
 

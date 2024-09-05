@@ -61,6 +61,7 @@ class MainActivity : AppCompatActivity() {
                             startActivity(Intent(this@MainActivity,MainActivity::class.java))
                             finish()
                         }
+                        show()
                     }
                 }
             }

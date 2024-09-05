@@ -21,6 +21,7 @@ import com.google.android.gms.location.Priority
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import me.chetan.manitbusdriver.Login.Companion.token
 import me.chetan.manitbusdriver.MainActivity.Companion.BASE
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -46,7 +47,7 @@ class LocationService : Service() {
         createNotificationChannel(channelId)
 
         val notification = NotificationCompat.Builder(applicationContext, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.mipmap.ic_launcher_round)
             .setContentTitle("Tracking bus")
             .setContentText("Tracking bus")
             .setPriority(NotificationCompat.PRIORITY_MAX)
@@ -80,7 +81,7 @@ class LocationService : Service() {
                                     put("time", location.time / 1000)
                                     put("speed", location.speed)
                                     put("chassisNo", chassisNo)
-                                    put("token", Login.token)
+                                    put("token", token)
                                 }
 
                                 outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
@@ -88,10 +89,20 @@ class LocationService : Service() {
                                 val responseCode = responseCode
                                 if (responseCode == HttpURLConnection.HTTP_OK) {
                                     running = true
-                                    val response = inputStream.bufferedReader().use { it.readText() }
-                                    // Process the response as needed
+                                    val response = JSONObject(inputStream.bufferedReader().use { it.readText() })
+                                    if(response.has("forceClose")){
+                                        if(response.getBoolean("forceClose")) stopSelf()
+                                    }
                                 } else {
-                                    // Handle error response
+                                    when(responseCode){
+                                        401 -> {
+                                            token = ""
+                                            getSharedPreferences("token", MODE_PRIVATE).edit().putString("token",
+                                                token
+                                            ).apply()
+                                            stopSelf()
+                                        }
+                                    }
                                 }
                             }
                         } catch (e:Exception){
