@@ -31,11 +31,14 @@ class TrackActivity : AppCompatActivity() {
             insets
         }
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED || ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED){
             val locationPermissionRequest = registerForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
             ) { permissions ->
                 when{
+                    permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+
+                    }
                     permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
                         MaterialAlertDialogBuilder(this).run {
                             setTitle("Need fine location")
@@ -46,9 +49,6 @@ class TrackActivity : AppCompatActivity() {
                             setCancelable(false)
                             show()
                         }
-                    }
-                    permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-
                     }
                     permissions.getOrDefault(Manifest.permission.CAMERA, false) -> {
 
