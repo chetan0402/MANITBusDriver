@@ -89,9 +89,12 @@ class LocationService : Service() {
                                 val responseCode = responseCode
                                 if (responseCode == HttpURLConnection.HTTP_OK) {
                                     running = true
-                                    val response = JSONObject(inputStream.bufferedReader().use { it.readText() })
-                                    if(response.has("forceClose")){
-                                        if(response.getBoolean("forceClose")) stopSelf()
+                                    val response = inputStream.bufferedReader().use { it.readText() }
+                                    if(response!=""){
+                                        val responseJson = JSONObject(response)
+                                        if(responseJson.has("forceClose")){
+                                            if(responseJson.getBoolean("forceClose")) stopSelf()
+                                        }
                                     }
                                 } else {
                                     when(responseCode){
