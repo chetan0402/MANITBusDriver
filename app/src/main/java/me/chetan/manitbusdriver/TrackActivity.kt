@@ -13,15 +13,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.budiyev.android.codescanner.CodeScanner
-import com.budiyev.android.codescanner.CodeScannerView
-import com.budiyev.android.codescanner.DecodeCallback
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.zxing.BarcodeFormat
+import io.github.g00fy2.quickie.QRResult
+import io.github.g00fy2.quickie.ScanQRCode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class TrackActivity : AppCompatActivity() {
-    private lateinit var codeScanner: CodeScanner
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -62,29 +62,26 @@ class TrackActivity : AppCompatActivity() {
         }
 
         val scanQR = findViewById<Button>(R.id.scanQR)
-        val scannerView = findViewById<CodeScannerView>(R.id.qr)
         val stopButton = findViewById<Button>(R.id.stopButton)
-        codeScanner = CodeScanner(this,scannerView)
-        codeScanner.formats = listOf(BarcodeFormat.QR_CODE)
-        scanQR.setOnClickListener {
-            scannerView.visibility = View.VISIBLE
-            codeScanner.startPreview()
-        }
 
-        codeScanner.decodeCallback = DecodeCallback {
-            qrText=it.text
-            codeScanner.stopPreview()
-            codeScanner.releaseResources()
-            runOnUiThread {
-                scannerView.visibility = View.GONE
-                scanQR.visibility = View.GONE
-                stopButton.visibility = View.VISIBLE
-            }
+        val qrLauncher = registerForActivityResult(ScanQRCode()) {
+            if(it !is QRResult.QRSuccess) return@registerForActivityResult
+            qrText = it.content.rawValue.toString()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(Intent(this,LocationService::class.java))
             }else{
                 startService(Intent(this,LocationService::class.java))
             }
+            this.lifecycleScope.launch(Dispatchers.IO){
+                runOnUiThread {
+                    scanQR.visibility = View.GONE
+                    stopButton.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        scanQR.setOnClickListener {
+            qrLauncher.launch(null)
         }
 
         stopButton.setOnClickListener {
@@ -117,12 +114,10 @@ class TrackActivity : AppCompatActivity() {
                 findViewById<Button>(R.id.stopButton).visibility = View.GONE
             }
         }
-        if(findViewById<CodeScannerView>(R.id.qr).visibility == View.VISIBLE && ::codeScanner.isInitialized) codeScanner.startPreview()
     }
 
     override fun onPause() {
         super.onPause()
-        if(::codeScanner.isInitialized ) codeScanner.stopPreview()
     }
 
     companion object {

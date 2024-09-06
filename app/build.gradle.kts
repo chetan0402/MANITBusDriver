@@ -49,8 +49,8 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.play.services.location)
+    implementation(libs.quickie.bundled)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation(libs.code.scanner)
 }
