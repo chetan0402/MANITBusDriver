@@ -17,6 +17,7 @@ import com.budiyev.android.codescanner.CodeScanner
 import com.budiyev.android.codescanner.CodeScannerView
 import com.budiyev.android.codescanner.DecodeCallback
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.zxing.BarcodeFormat
 
 
 class TrackActivity : AppCompatActivity() {
@@ -64,6 +65,7 @@ class TrackActivity : AppCompatActivity() {
         val scannerView = findViewById<CodeScannerView>(R.id.qr)
         val stopButton = findViewById<Button>(R.id.stopButton)
         codeScanner = CodeScanner(this,scannerView)
+        codeScanner.formats = listOf(BarcodeFormat.QR_CODE)
         scanQR.setOnClickListener {
             scannerView.visibility = View.VISIBLE
             codeScanner.startPreview()
